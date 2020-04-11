@@ -1,0 +1,26 @@
+{
+  "name": "eazytec_util",
+  "version": "1.0.0",
+  "description": "自动化工具",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "chalk": "^3.0.0",
+    "commander": "^4.1.1",
+    "esprima": "^4.0.1",
+    "inquirer": "^7.0.4",
+    "superagent": "^5.2.2"
+  },
+  "bin": {
+    "eazytec": "--max_old_space_size=100000 ./src/index.js"
+  },
+  "devDependencies": {
+    "@babel/generator": "^7.9.5",
+    "@babel/parser": "^7.9.4"
+  }
+}
