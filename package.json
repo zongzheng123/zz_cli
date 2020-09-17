@@ -1,6 +1,6 @@
 {
-  "name": "eazytec_util",
-  "version": "1.0.0",
+  "name": "@zongzheng/zz_cli",
+  "version": "1.0.2",
   "description": "自动化工具",
   "main": "index.js",
   "scripts": {
@@ -9,6 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@babel/standalone": "^7.10.2",
+    "@babel/traverse": "^7.10.1",
     "axios": "^0.19.2",
     "chalk": "^3.0.0",
     "commander": "^4.1.1",
@@ -17,10 +19,14 @@
     "superagent": "^5.2.2"
   },
   "bin": {
-    "eazytec": "--max_old_space_size=100000 ./src/index.js"
+    "eazytec": "./src/index.js"
   },
   "devDependencies": {
+    "@babel/core": "^7.10.2",
     "@babel/generator": "^7.9.5",
-    "@babel/parser": "^7.9.4"
+    "@babel/parser": "^7.9.4",
+    "@babel/plugin-syntax-jsx": "^7.10.1",
+    "@babel/plugin-transform-react-jsx": "^7.10.1",
+    "@babel/register": "^7.10.1"
   }
 }

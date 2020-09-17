@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-02-20 09:47:26
- * @LastEditTime: 2020-03-30 16:04:12
+ * @LastEditTime: 2020-04-21 13:13:09
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \utils\src\service_generator.js
@@ -34,8 +34,7 @@ const modelHelpNameParser = function () {
 }
 
 
-// 模型数据处理方法名字
-const modelHelpNames = modelHelpNameParser()
+
 
 const isObj = function (result) {
     return Object.prototype.toString(result) === '[object Object]' && result !== null
@@ -136,7 +135,7 @@ const pathsTransform = function (paths, tags, definitions, mock) {
 
         let data = undefined
         if (method === 'get') {
-            if (descriptionObj.responses['200'].schema.originalRef) {
+            if (descriptionObj.responses['200'].schema && descriptionObj.responses['200'].schema.originalRef) {
                 const response = definitions[descriptionObj.responses['200'].schema.originalRef].properties
                 const result = response.result
                 if (result && isObj(result)) {
@@ -150,6 +149,7 @@ const pathsTransform = function (paths, tags, definitions, mock) {
                     list: data,
                     total: 0,
                     size: 0,
+                    current: 1,
                     isPage: true
                 }
             }
@@ -201,7 +201,8 @@ const serviceGegerator = function (pathObj) {
                 let parameterArr = []
                 if (item.parameters.query) {
                     parameterArr.push('query')
-                    queryStr = `\?\${stringify(query)}`
+                    queryStr = `stringify(query)`
+                  
                 }
                 if (item.parameters.body) {
                     parameterArr.push('data')
@@ -217,17 +218,22 @@ const serviceGegerator = function (pathObj) {
                     parameterStr = parameterArr[0]
                 }
             }
+            let queryJoin = `\`${item.path}\``
+            if (queryStr) {
+                queryJoin = `[\`${item.path}\`, ${queryStr}].filter(item => item).join('?')`
+            } 
+
             if (item.method === 'get' ) {
                 if (item.transform) {
-                    return `/**${key + item.summary}**/\nexport function ${item.functionName} ( ${parameterStr} ) {\n    return request(restfulUrlReplace(\`${item.path + queryStr}\`, param))\n}`
+                    return `/**${key + item.summary}**/\nexport function ${item.functionName} ( ${parameterStr} ) {\n    return request(restfulUrlReplace(${queryJoin}, param))\n}`
                 }
-              return `/**${key + item.summary}**/\nexport function ${item.functionName} ( ${parameterStr} ) {\n    return request(\`${item.path + queryStr}\`)\n}`
+              return `/**${key + item.summary}**/\nexport function ${item.functionName} ( ${parameterStr} ) {\n    return request(${queryJoin})\n}`
             }
             if (item.method === 'post') {
                 if (item.transform) {
-                    return `/**${item.summary + key}**/\nexport function ${item.functionName} ( ${parameterStr} ) {\n    return request(restfulUrlReplace(\`${item.path + queryStr}\`, param), {${dataStr}\n        method: 'post'    \n    })\n}`
+                    return `/**${item.summary + key}**/\nexport function ${item.functionName} ( ${parameterStr} ) {\n    return request(restfulUrlReplace(${queryJoin}, param), {${dataStr}\n        method: 'post'    \n    })\n}`
                 }
-                return `/**${item.summary + key}**/\nexport function ${item.functionName} ( ${parameterStr} ) {\n    return request(\`${item.path + queryStr}\`, {${dataStr}\n        method: 'post'    \n    })\n}`
+                return `/**${item.summary + key}**/\nexport function ${item.functionName} ( ${parameterStr} ) {\n    return request(${queryJoin}, {${dataStr}\n        method: 'post'    \n    })\n}`
             }
         })
         childProcess.execSync(`del ${dirPath}\\${value.description}\.js`)
@@ -248,6 +254,8 @@ const modelHelpGenerator = function (models) {
     // fs.writeFileSync(dirPath + '/' + 'modelHelp' + '.js',template)
 }
 const modelGenerator = function (pathObj) {
+    // 模型数据处理方法名字
+    const modelHelpNames = modelHelpNameParser()
     const dirPath = path.resolve(process.cwd(), './src/models')
     try{
       fs.mkdirSync(dirPath, { recursive: true });
@@ -288,7 +296,7 @@ const modelGenerator = function (pathObj) {
                 const modelName = request.functionName.split('').slice(3).join('')
                 let res = 'payload.result'
                 if (request.data && request.data.isPage) {
-                    res = `{\n                    list: payload.result\,\n                    total: payload.total\,\n                    size: payload.size\n                }`
+                    res = `{\n                    list: payload.result\,\n                    current: payload.current\,\n                    total: payload.total\,\n                    size: payload.size\n                }`
                 }
                 if (modelHelpNames.indexOf(modelName + 'Help') > -1) {
                     res = `${modelName}Help(${res})`
@@ -309,7 +317,7 @@ const modelGenerator = function (pathObj) {
 
 
 module.exports = function (config) {
-    const baseUrl = config.baseUrl || 'http://192.168.193.128:8080'
+    const baseUrl = config.baseUrl || 'http://gateway.yanshi.ygzuo.com'
     const project = config.project
     const generator = function ({project}) {
         const url = `${baseUrl}/external/${project}/v2/api-docs`

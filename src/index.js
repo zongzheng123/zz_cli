@@ -1,12 +1,4 @@
-/*
- * @Author: your name
- * @Date: 2020-02-20 09:00:52
- * @LastEditTime: 2020-04-07 16:06:00
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: \utils\src\index.js
- */
-#!/usr/bin/env node
+#! /usr/bin/env node
 
 const program = require('commander');
 const serviceGenerator = require('./service_generator')
@@ -23,6 +15,7 @@ const config = {}
 const argsParse = args.map((arg) => [arg.split('=')[0], arg.split('=')[1]]).forEach(([key, value]) => {
     config[key] = value
 })
+
 
 if (process.argv.length === 2) {
   console.dir(program.help())
